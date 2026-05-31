@@ -1,15 +1,12 @@
 [phases.setup]
-nixPkgs = ["python313", "nodejs_20"]
+nixPkgs = ["python312", "pip", "nodejs_20"]
 
 [phases.install]
-cmds = [
-  "pip install -r requirements.txt",
-  "cd 'Design Ai4UX Web App' && npm install"
-]
+cmds = ["pip install -r requirements.txt"]
 
 [phases.build]
 cmds = [
-  "cd 'Design Ai4UX Web App' && npm run build && cp -r dist ../dist"
+  "cd 'Design Ai4UX Web App' && npm install && npm run build && cp -r dist ../dist"
 ]
 
 [start]
