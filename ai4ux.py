@@ -1308,13 +1308,35 @@ def api_rag_stats():
     user_id = current_user_id()
     if user_id == "anonymous":
         return jsonify({"error": "Not logged in"}), 401
-    return jsonify(rag.stats(user_id))
+    # Ingest built-in guidelines if collection is empty
+    try:
+        stats = rag.stats(user_id)
+        if stats.get("available") and stats.get("collections", {}).get("guidelines", 0) == 0:
+            rag.ingest_builtin_guidelines(BUILTIN_GUIDELINES)
+        return jsonify(rag.stats(user_id))
+    except Exception as e:
+        return jsonify({"available": False, "error": str(e)})
 
 @app.route("/api/rag/reindex", methods=["POST"])
 @login_required
 def api_rag_reindex():
-    _rag_warmup_async(current_user_id())
-    return jsonify({"status": "reindex_started"})
+    # Run synchronously for reliability (not in thread)
+    try:
+        rag.ingest_builtin_guidelines(BUILTIN_GUIDELINES)
+        with connect_db() as conn:
+            # conventions
+            rows = conn.execute("SELECT id, description, feedback_type FROM conventions WHERE user_id=%s", (current_user_id(),)).fetchall()
+            for r in rows:
+                rag.ingest_convention(current_user_id(), r['id'], r['description'], r['feedback_type'])
+            # components
+            rows = conn.execute("SELECT id, name, type, design_specs, status FROM generated_components WHERE user_id=%s", (current_user_id(),)).fetchall()
+            rag.ingest_components_bulk(current_user_id(), rows)
+            # product context
+            rows = conn.execute("SELECT id, product_name, feature_domain, insight FROM product_context WHERE user_id=%s", (current_user_id(),)).fetchall()
+            rag.ingest_product_context_bulk(current_user_id(), rows)
+    except Exception as e:
+        app.logger.warning(f"Reindex error: {e}")
+    return jsonify({"status": "reindex_done"})
 
 # ── Auth routes ───────────────────────────────────────────────
 LOGIN_PAGE = """<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ai4UX</title>
