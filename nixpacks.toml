@@ -1,0 +1,16 @@
+[phases.setup]
+nixPkgs = ["python313", "nodejs_20"]
+
+[phases.install]
+cmds = [
+  "pip install -r requirements.txt",
+  "cd 'Design Ai4UX Web App' && npm install"
+]
+
+[phases.build]
+cmds = [
+  "cd 'Design Ai4UX Web App' && npm run build && cp -r dist ../dist"
+]
+
+[start]
+cmd = "gunicorn ai4ux:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120"

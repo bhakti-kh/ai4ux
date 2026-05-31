@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+venv/
+env/
+.env
+
+# Database & data
+ai4ux.db
+specs/
+design_system/
+research/
+
+# Node
+node_modules/
+Design Ai4UX Web App/node_modules/
+
+# Build (commit dist/ only if building locally)
+# dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Secrets
+*.pem
+*.key
