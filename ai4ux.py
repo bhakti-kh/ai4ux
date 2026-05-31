@@ -82,9 +82,9 @@ def connect_db():
     if _USE_PG:
         return _PGConn(DATABASE_URL)
     import sqlite3 as _sq
-    conn = _sq.connect("ai4ux.db")
-    conn.row_factory = _sq.Row
-    return conn
+    _conn = _sq.connect("ai4ux.db")
+    _conn.row_factory = _sq.Row
+    return _conn
 
 client        = anthropic.Anthropic(api_key=CLAUDE_API_KEY)
 last_analysis = {}
@@ -1241,6 +1241,66 @@ Rules: compliance_score 0-100. status exactly Covered/Partial/Missing. complexit
 # ============================================================
 # FLASK ROUTES
 # ============================================================
+
+# ── Emergency DB init route (hit once after fresh deploy) ─────
+@app.route("/init-db-now")
+def init_db_now():
+    results = []
+    conn = connect_db()
+    tables = [
+        ("specs", """CREATE TABLE IF NOT EXISTS specs (
+            id SERIAL PRIMARY KEY, spec_id TEXT UNIQUE, ticket_id TEXT,
+            ticket_summary TEXT, screen_file TEXT, compliance INTEGER, components TEXT,
+            created_at TEXT, json_path TEXT, user_id TEXT DEFAULT 'anonymous',
+            spec_data TEXT)"""),
+        ("ds_files", """CREATE TABLE IF NOT EXISTS ds_files (
+            id SERIAL PRIMARY KEY, filename TEXT, file_type TEXT,
+            content TEXT, uploaded_at TEXT, user_id TEXT DEFAULT 'anonymous')"""),
+        ("research_items", """CREATE TABLE IF NOT EXISTS research_items (
+            id SERIAL PRIMARY KEY, title TEXT, item_type TEXT,
+            source TEXT, content TEXT, added_at TEXT, user_id TEXT DEFAULT 'anonymous')"""),
+        ("conventions", """CREATE TABLE IF NOT EXISTS conventions (
+            id SERIAL PRIMARY KEY, user_id TEXT DEFAULT 'anonymous',
+            title TEXT, description TEXT, category TEXT, priority TEXT,
+            source_ticket TEXT, source_screen TEXT, feedback_type TEXT, created_at TEXT)"""),
+        ("generated_components", """CREATE TABLE IF NOT EXISTS generated_components (
+            id SERIAL PRIMARY KEY, user_id TEXT DEFAULT 'anonymous',
+            name TEXT, type TEXT, html_code TEXT, react_code TEXT,
+            design_specs TEXT, source_ticket TEXT, source_screen TEXT,
+            status TEXT DEFAULT 'canonical', conflict_with INTEGER, created_at TEXT)"""),
+        ("product_context", """CREATE TABLE IF NOT EXISTS product_context (
+            id SERIAL PRIMARY KEY, user_id TEXT DEFAULT 'anonymous',
+            product_name TEXT DEFAULT 'Unknown', feature_domain TEXT, pattern TEXT,
+            insight TEXT, source_ticket TEXT, source_screen TEXT,
+            item_type TEXT DEFAULT 'auto', content TEXT, title TEXT, created_at TEXT)"""),
+        ("guideline_activation", """CREATE TABLE IF NOT EXISTS guideline_activation (
+            id SERIAL PRIMARY KEY, user_id TEXT DEFAULT 'anonymous',
+            registry_id TEXT, is_active INTEGER DEFAULT 1,
+            scope TEXT DEFAULT 'global', product_name TEXT DEFAULT '', created_at TEXT)"""),
+        ("custom_guidelines", """CREATE TABLE IF NOT EXISTS custom_guidelines (
+            id SERIAL PRIMARY KEY, user_id TEXT DEFAULT 'anonymous',
+            name TEXT, version TEXT, category TEXT,
+            content TEXT, filename TEXT, is_active INTEGER DEFAULT 1, created_at TEXT)"""),
+        ("guideline_profiles", """CREATE TABLE IF NOT EXISTS guideline_profiles (
+            id SERIAL PRIMARY KEY, user_id TEXT DEFAULT 'anonymous',
+            product_name TEXT, active_registries TEXT, overrides TEXT, created_at TEXT)"""),
+        ("conflict_resolutions", """CREATE TABLE IF NOT EXISTS conflict_resolutions (
+            id SERIAL PRIMARY KEY, user_id TEXT DEFAULT 'anonymous',
+            conflict_id TEXT, resolution TEXT, remember INTEGER DEFAULT 0, created_at TEXT)"""),
+        ("gap_resolutions", """CREATE TABLE IF NOT EXISTS gap_resolutions (
+            id SERIAL PRIMARY KEY, user_id TEXT DEFAULT 'anonymous',
+            spec_id TEXT, gap_title TEXT, status TEXT DEFAULT 'open',
+            notes TEXT, created_at TEXT)"""),
+    ]
+    for name, sql in tables:
+        try:
+            conn.execute(sql)
+            conn.commit()
+            results.append(f"OK: {name}")
+        except Exception as e:
+            results.append(f"ERROR {name}: {str(e)}")
+    conn.close()
+    return "<br>".join(results) + "<br><br><b>Done.</b>"
 
 # ── RAG routes ────────────────────────────────────────────────
 @app.route("/api/rag/stats")
