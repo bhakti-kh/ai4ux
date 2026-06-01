@@ -16,8 +16,9 @@ import { GuidelinesPage }          from "./components/GuidelinesPage";
 import { PromptPreviewModal }      from "./components/PromptPreviewModal";
 import type { HandoffMode }        from "./components/PromptPreviewModal";
 import { CitationsPanel }          from "./components/CitationsPanel";
+import { TeamPage } from "./components/TeamPage";
 
-type Page      = "dashboard"|"analyser"|"product-context"|"design-system"|"generator"|"conventions"|"history"|"guidelines";
+type Page = "dashboard"|"analyser"|"product-context"|"design-system"|"generator"|"conventions"|"history"|"guidelines"|"team";
 type ResultTab = "audit"|"components"|"gaps"|"recommendations"|"citations"|"json";
 
 interface Ticket { key:string;summary:string;status:string;issue_type:string;priority:string; }
@@ -46,6 +47,7 @@ const NAV = [
   {id:"conventions",    icon:"🧠", label:"Conventions"},
   {id:"guidelines",     icon:"♿",  label:"Guidelines"},
   {id:"history",        icon:"🗂",  label:"History"},
+  {id:"team",           icon:"👥", label:"Team"},
 ];
 
 export default function App() {
@@ -243,6 +245,7 @@ export default function App() {
           {page==="conventions"    && <div className="flex-1 overflow-auto"><ConventionsPage/></div>}
           {page==="history"        && <div className="flex-1 overflow-auto"><HistoryPage/></div>}
           {page==="guidelines"    && <div className="flex-1 overflow-auto"><GuidelinesPage/></div>}
+          {page==="team" && <div className="flex-1 overflow-auto"><TeamPage userEmail={user?.email||""}/></div>}
 
           {page==="analyser"&&(
             <div className="flex flex-1 overflow-hidden">
