@@ -1965,12 +1965,9 @@ def api_rag_stats():
     user_id = current_user_id()
     return jsonify(rag.stats(user_id))
 @app.route("/api/rag/reindex", methods=["POST"])
+@login_required
 def api_rag_reindex():
-    user_id = current_user_id()
-    if not user_id or user_id == "anonymous":
-    if not user_id:
-        return jsonify({"error": "Not logged in"}), 401
-    _rag_warmup_async(user_id)
+    _rag_warmup_async(current_user_id())
     return jsonify({"status": "reindex_started"})
 LOGIN_PAGE = """<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ai4UX</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
