@@ -1295,7 +1295,7 @@ def generate_route():
     ds    = DS_PROFILES.get(fallback_ds, DS_PROFILES["carbon"])
     comps = get_canonical_components(uid)
     prod_ctx = get_product_context_summary(uid)
-    rag_ctx  = rag.build_component_gen_context(user_id=uid)
+    rag_ctx  = ""
 
     if comps:
         ds_list    = "YOUR CONFIRMED DESIGN SYSTEM (use ONLY these components):\n"
