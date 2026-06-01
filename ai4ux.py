@@ -1963,11 +1963,7 @@ Rules: compliance_score 0-100. status exactly Covered/Partial/Missing. complexit
 @app.route("/api/rag/stats")
 def api_rag_stats():
     user_id = current_user_id()
-    if not user_id or user_id == "anonymous":
-    if not user_id:
-        return jsonify({"error": "Not logged in"}), 401
     return jsonify(rag.stats(user_id))
-
 @app.route("/api/rag/reindex", methods=["POST"])
 def api_rag_reindex():
     user_id = current_user_id()
