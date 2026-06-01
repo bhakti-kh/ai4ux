@@ -373,8 +373,7 @@ class RagStore:
             # 3. Conventions
             try:
                 rows = db_conn.execute(
-                    "SELECT id, recommendation, decision, edited_text "
-                    "FROM conventions WHERE user_id = ?",
+                    "SELECT id, description as recommendation, feedback_type as decision, description as edited_text FROM conventions WHERE user_id = %s",
                     (user_id,)
                 ).fetchall()
                 self.ingest_conventions_bulk(user_id, rows)
