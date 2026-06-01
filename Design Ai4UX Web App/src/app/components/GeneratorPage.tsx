@@ -1,3 +1,4 @@
+import { FigmaPushButton } from "./FigmaPushButton";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
@@ -631,7 +632,11 @@ export function GeneratorPage({ designSystem, onDSChange, handoffPrompt, onHando
                     <div>
                       <div className="flex items-center justify-between mb-3">
                         <div className="text-xs font-semibold text-gray-500" style={{letterSpacing:"0.08em"}}>FIGMA SPEC — Plugin API JSON</div>
-                        <div className="flex gap-2">
+                      <div className="flex gap-2 items-center">
+                          <FigmaPushButton
+                            figmaSpec={result.figma_spec}
+                            componentName={result.title}
+                          />
                           <button onClick={()=>navigator.clipboard.writeText(JSON.stringify(result.figma_spec,null,2))}
                             className="px-3 py-1 text-xs border border-[#0f62fe] text-[#0f62fe] rounded hover:bg-blue-50 transition-colors"
                             style={{fontWeight:600}}>Copy JSON</button>
