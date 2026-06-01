@@ -3107,5 +3107,7 @@ def figma_status():
     except Exception as e:
         return jsonify({"configured": False, "message": str(e)})
 
-    if __name__=="__main__":
-    ... 
+   if __name__=="__main__":
+    port = int(os.environ.get("PORT", 5000))
+    debug = not os.environ.get("RAILWAY_ENVIRONMENT")
+    app.run(host="0.0.0.0", port=port, debug=debug)
