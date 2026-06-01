@@ -17,8 +17,9 @@ import { PromptPreviewModal }      from "./components/PromptPreviewModal";
 import type { HandoffMode }        from "./components/PromptPreviewModal";
 import { CitationsPanel }          from "./components/CitationsPanel";
 import { TeamPage } from "./components/TeamPage";
+import { ToastContainer, useToastRegister, toastError, toastSuccess } from "./components/Toast";
 
-type Page = "dashboard"|"analyser"|"product-context"|"design-system"|"generator"|"conventions"|"history"|"guidelines"|"team";
+type Page      = "dashboard"|"analyser"|"product-context"|"design-system"|"generator"|"conventions"|"history"|"guidelines"|"team";
 type ResultTab = "audit"|"components"|"gaps"|"recommendations"|"citations"|"json";
 
 interface Ticket { key:string;summary:string;status:string;issue_type:string;priority:string; }
@@ -62,6 +63,7 @@ export default function App() {
   const [activeTab, setActiveTab]     = useState<ResultTab>("audit");
   const [analysingAll, setAnalysingAll] = useState(false);
   const [user, setUser]               = useState<any>(null);
+  const { toasts, dismiss } = useToastRegister();
   const [tooltip, setTooltip]         = useState<string|null>(null);
   const [popup, setPopup]             = useState<{components:any[];ticketId:string;screenFile:string}|null>(null);
   const [handoffModal, setHandoffModal] = useState<{mode:HandoffMode;screen:any;gaps:any[];selectedComp?:any}|null>(null);
@@ -129,8 +131,14 @@ export default function App() {
         const data=await resp.json();
         if(data.error){
           setScreens(prev=>prev.map((s,idx)=>idx===i?{...s,analysing:false,error:data.error}:s));
+          if(data.error.toLowerCase().includes("credit")){
+            toastError("Anthropic API credits exhausted. Please top up to continue.", {label:"Go to Billing", href:"https://console.anthropic.com/settings/billing"});
+          } else {
+            toastError(`Analysis failed: ${data.error}`);
+          }
         } else {
           setScreens(prev=>prev.map((s,idx)=>idx===i?{...s,analysing:false,result:{...data,_filename:screens[i].file.name}}:s));
+          toastSuccess(`Screen ${i+1} analysed — ${data.compliance_score}% compliance`);
           // Show popup if new components found
           const newComps = data._new_components||[];
           if(newComps.length>0){
@@ -229,10 +237,7 @@ export default function App() {
             </button>
           ))}
           <div className="mt-auto mb-2">
-            {user?.picture
-              ?<a href="/logout" title="Sign out"><img src={user.picture} alt={user.name} className="w-8 h-8 rounded-full border-2 border-gray-200 hover:border-red-400 transition-colors"/></a>
-              :<a href="/logout" className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 text-gray-500 text-xs no-underline hover:bg-red-100">👤</a>
-            }
+            {user?.picture && <img src={user.picture} alt={user.name} className="w-8 h-8 rounded-full border-2 border-gray-200"/>}
           </div>
         </div>
 
@@ -245,7 +250,8 @@ export default function App() {
           {page==="conventions"    && <div className="flex-1 overflow-auto"><ConventionsPage/></div>}
           {page==="history"        && <div className="flex-1 overflow-auto"><HistoryPage/></div>}
           {page==="guidelines"    && <div className="flex-1 overflow-auto"><GuidelinesPage/></div>}
-          {page==="team" && <div className="flex-1 overflow-auto"><TeamPage userEmail={user?.email||""}/></div>}
+          {page==="team"          && <div className="flex-1 overflow-auto"><TeamPage userEmail={user?.email||""}/>
+          </div>}
 
           {page==="analyser"&&(
             <div className="flex flex-1 overflow-hidden">
@@ -498,6 +504,7 @@ export default function App() {
           )}
         </div>
       </div>
+      <ToastContainer toasts={toasts} onDismiss={dismiss} />
       <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
     </div>
   );
