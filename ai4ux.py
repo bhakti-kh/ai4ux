@@ -35,7 +35,7 @@ USE_REACT = os.path.exists(DIST_DIR)
 # ============================================================
 FIGMA_TOKEN    = os.environ.get("FIGMA_TOKEN", "")
 FIGMA_FILE_KEY = os.environ.get("FIGMA_FILE_KEY", "")
-FIGMA_API_BASE = "https://api.figma.com/v1"
+FIGMA_API_BASE = "https://api.figma.com/v1"  # sprint7b
 CLAUDE_API_KEY       = os.environ.get("CLAUDE_API_KEY", "")
 JIRA_DOMAIN          = os.environ.get("JIRA_DOMAIN", "yourcompany.atlassian.net")
 JIRA_EMAIL           = os.environ.get("JIRA_EMAIL", "you@company.com")
