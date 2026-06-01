@@ -2021,7 +2021,7 @@ def auth_callback():
     user_info = user_resp.json()
     session['user'] = {'email':user_info.get('email'),'name':user_info.get('name'),'picture':user_info.get('picture')}
     session.pop('oauth_state', None)
-    _rag_warmup_async(session["user_id"])
+    _rag_warmup_async(session["user"]["email"])
     return redirect('/')
 
 @app.route("/logout")
