@@ -637,7 +637,7 @@ export function GeneratorPage({ designSystem, onDSChange, handoffPrompt, onHando
                             figmaSpec={result.figma_spec}
                             componentName={result.title}
                           />
-<FigmaPushButton figmaSpec={result.figma_spec} componentName={result.title} />
+                          
                           <button onClick={()=>navigator.clipboard.writeText(JSON.stringify(result.figma_spec,null,2))}
                             className="px-3 py-1 text-xs border border-[#0f62fe] text-[#0f62fe] rounded hover:bg-blue-50 transition-colors"
                             style={{fontWeight:600}}>Copy JSON</button>                        </div>
