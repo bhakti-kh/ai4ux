@@ -3079,13 +3079,8 @@ createComponent().catch(console.error);
 @app.route("/api/figma/status")
 @login_required
 def figma_status():
-    """Check if Figma credentials are configured."""
     if not FIGMA_TOKEN or not FIGMA_FILE_KEY:
-        return jsonify({
-            "configured": False,
-            "message": "Set FIGMA_TOKEN and FIGMA_FILE_KEY in Railway environment variables",
-        })
-    # Quick ping to verify token works
+        return jsonify({"configured": False, "message": "Set FIGMA_TOKEN and FIGMA_FILE_KEY in Railway"})
     try:
         resp = http_requests.get(
             f"{FIGMA_API_BASE}/files/{FIGMA_FILE_KEY}?depth=1",
@@ -3094,12 +3089,7 @@ def figma_status():
         )
         if resp.status_code == 200:
             file_name = resp.json().get("name", "Unknown file")
-            return jsonify({
-                "configured": True,
-                "file_name":  file_name,
-                "file_key":   FIGMA_FILE_KEY,
-                "figma_url":  f"https://www.figma.com/file/{FIGMA_FILE_KEY}",
-            })
+            return jsonify({"configured": True, "file_name": file_name, "file_key": FIGMA_FILE_KEY, "figma_url": f"https://www.figma.com/file/{FIGMA_FILE_KEY}"})
         elif resp.status_code == 403:
             return jsonify({"configured": False, "message": "Token invalid or no access to file"})
         else:
@@ -3107,7 +3097,7 @@ def figma_status():
     except Exception as e:
         return jsonify({"configured": False, "message": str(e)})
 
-   if __name__=="__main__":
+if __name__=="__main__":
     port = int(os.environ.get("PORT", 5000))
     debug = not os.environ.get("RAILWAY_ENVIRONMENT")
     app.run(host="0.0.0.0", port=port, debug=debug)
