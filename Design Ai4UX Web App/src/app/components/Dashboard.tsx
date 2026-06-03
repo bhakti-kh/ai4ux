@@ -48,7 +48,7 @@ export function Dashboard({ user }: { user: any }) {
           {greeting}{user?.name?`, ${user.name.split(' ')[0]}`:""}
         </h1>
         <p className="text-sm text-gray-500" style={{fontFamily:"IBM Plex Sans, sans-serif"}}>
-          Your Ai4UX pipeline overview.
+          Your Aetheris design intelligence overview.
         </p>
       </div>
 

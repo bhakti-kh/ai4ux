@@ -21,6 +21,7 @@ import { ToastContainer, useToastRegister, toastError, toastSuccess } from "./co
 import { useTheme } from "./hooks/useTheme";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { TicketIntelligencePage } from "./components/TicketIntelligencePage";
+import { TicketIntelligenceBanner } from "./components/TicketIntelligenceBanner";
 
 
 type Page      = "dashboard"|"analyser"|"product-context"|"design-system"|"generator"|"conventions"|"history"|"guidelines"|"team"|"ticket-intelligence";
@@ -218,10 +219,7 @@ export default function App() {
   {isAetheris && (
     <img src="/logos/aetheris-mark-dark.svg" alt="Aetheris" style={{width:24,height:24}}/>
   )}
-  {isAetheris
-    ? <span style={{color:"#D7DEE8",fontFamily:"Inter, sans-serif",letterSpacing:"-0.02em"}}>Aetheris</span>
-    : <><span className="text-[#0f62fe]">Ai</span><span className="text-[#ff832b]">4</span><span className="text-[#0f62fe]">UX</span></>
-  }
+  <span style={{color: isAetheris ? "#D7DEE8" : "#0f62fe", fontFamily:"Inter, sans-serif", letterSpacing:"-0.02em", fontWeight:700}}>Aetheris</span>
 </div>
           <div className="px-3 py-1 bg-gray-100 rounded-full">
             <span className="text-xs text-gray-500" style={{fontFamily:"IBM Plex Sans, sans-serif"}}>Design Intelligence</span>
@@ -326,6 +324,12 @@ export default function App() {
                         {ticket.priority&&<span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded">{ticket.priority}</span>}
                       </div>
                     </div>
+                  )}
+                  {ticket && (
+                    <TicketIntelligenceBanner
+                      ticketId={ticket.key}
+                      onNavigate={() => setPage("ticket-intelligence")}
+                    />
                   )}
                 </div>
 
