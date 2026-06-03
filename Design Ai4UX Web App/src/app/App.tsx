@@ -221,9 +221,7 @@ export default function App() {
   }
 </div>
           <div className="px-3 py-1 bg-gray-100 rounded-full">
-            <span className="text-xs text-gray-500" style={{fontFamily:"IBM Plex Sans, sans-serif"}}>
-  {isAetheris ? "Intelligence Platform" : "UX Pipeline"}
-</span>
+            <span className="text-xs text-gray-500" style={{fontFamily:"IBM Plex Sans, sans-serif"}}>Design Intelligence</span>
           </div>
         </div>
         <div className="flex items-center gap-3">
