@@ -29,8 +29,9 @@ logger = logging.getLogger(__name__)
 
 # ── ChromaDB boot ─────────────────────────────────────────────────────────────
 _CHROMA_PATH = os.environ.get("CHROMA_PATH", "/tmp/chroma_db")
-
 try:
+    if os.environ.get("DISABLE_CHROMA"):
+        raise ImportError("ChromaDB disabled via DISABLE_CHROMA env var")
     import chromadb
     from chromadb.utils import embedding_functions
 
