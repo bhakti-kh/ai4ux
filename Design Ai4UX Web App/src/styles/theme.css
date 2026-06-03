@@ -179,3 +179,142 @@
     line-height: 1.5;
   }
 }
+/* ============================================================
+   AETHERIS THEME — add to end of theme.css
+   ============================================================ */
+
+[data-theme="aetheris"] {
+  /* Core surfaces */
+  --background:         #0D1117;
+  --foreground:         #D7DEE8;
+  --card:               #1E2633;
+  --card-foreground:    #D7DEE8;
+  --popover:            #1E2633;
+  --popover-foreground: #D7DEE8;
+
+  /* Brand */
+  --primary:            #3A6FF7;
+  --primary-foreground: #F8FAFC;
+
+  /* Secondary surfaces */
+  --secondary:          #1E2633;
+  --secondary-foreground: #D7DEE8;
+
+  /* Muted */
+  --muted:              #1E2633;
+  --muted-foreground:   #8A95A3;
+
+  /* Accent */
+  --accent:             #1E2633;
+  --accent-foreground:  #5DD6FF;
+
+  /* Destructive */
+  --destructive:        #d4183d;
+  --destructive-foreground: #F8FAFC;
+
+  /* Borders & inputs */
+  --border:             rgba(255, 255, 255, 0.08);
+  --input:              #1E2633;
+  --input-background:   #1E2633;
+  --switch-background:  #3A6FF7;
+  --ring:               #3A6FF7;
+
+  /* Charts */
+  --chart-1:            #3A6FF7;
+  --chart-2:            #5DD6FF;
+  --chart-3:            #7C5CFF;
+  --chart-4:            #D7DEE8;
+  --chart-5:            #8A95A3;
+
+  /* Sidebar */
+  --sidebar:            #0D1117;
+  --sidebar-foreground: #D7DEE8;
+  --sidebar-primary:    #3A6FF7;
+  --sidebar-primary-foreground: #F8FAFC;
+  --sidebar-accent:     #1E2633;
+  --sidebar-accent-foreground: #5DD6FF;
+  --sidebar-border:     rgba(255, 255, 255, 0.06);
+  --sidebar-ring:       #3A6FF7;
+
+  /* Aetheris-specific tokens */
+  --aetheris-obsidian:  #0D1117;
+  --aetheris-slate:     #1E2633;
+  --aetheris-blue:      #3A6FF7;
+  --aetheris-cyan:      #5DD6FF;
+  --aetheris-violet:    #7C5CFF;
+  --aetheris-mist:      #D7DEE8;
+  --aetheris-ghost:     #8A95A3;
+}
+
+/* ── Aetheris hardcoded Tailwind overrides ──────────────────
+   These target the inline styles used throughout App.tsx
+   that don't use CSS variables                               */
+
+[data-theme="aetheris"] .bg-white,
+[data-theme="aetheris"] .bg-\[\#f4f4f4\] {
+  background-color: #0D1117 !important;
+}
+
+[data-theme="aetheris"] .bg-gray-50,
+[data-theme="aetheris"] .bg-gray-100 {
+  background-color: #1E2633 !important;
+}
+
+[data-theme="aetheris"] .bg-gray-200 {
+  background-color: #2A3441 !important;
+}
+
+[data-theme="aetheris"] .text-gray-900,
+[data-theme="aetheris"] .text-\[\#161616\] {
+  color: #D7DEE8 !important;
+}
+
+[data-theme="aetheris"] .text-gray-600,
+[data-theme="aetheris"] .text-gray-500,
+[data-theme="aetheris"] .text-gray-400 {
+  color: #8A95A3 !important;
+}
+
+[data-theme="aetheris"] .border-gray-200,
+[data-theme="aetheris"] .border-gray-100 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="aetheris"] .shadow-sm {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Nav active state */
+[data-theme="aetheris"] .bg-\[\#eff6ff\] {
+  background-color: rgba(58, 111, 247, 0.15) !important;
+}
+
+/* Inputs */
+[data-theme="aetheris"] input,
+[data-theme="aetheris"] select,
+[data-theme="aetheris"] textarea {
+  background-color: #1E2633 !important;
+  color: #D7DEE8 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Code blocks */
+[data-theme="aetheris"] pre {
+  background-color: #0A0E14 !important;
+}
+
+/* Scrollbar */
+[data-theme="aetheris"] ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+[data-theme="aetheris"] ::-webkit-scrollbar-track {
+  background: #0D1117;
+}
+[data-theme="aetheris"] ::-webkit-scrollbar-thumb {
+  background: #2A3441;
+  border-radius: 3px;
+}
+[data-theme="aetheris"] ::-webkit-scrollbar-thumb:hover {
+  background: #3A6FF7;
+}

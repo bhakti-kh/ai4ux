@@ -18,6 +18,8 @@ import type { HandoffMode }        from "./components/PromptPreviewModal";
 import { CitationsPanel }          from "./components/CitationsPanel";
 import { TeamPage } from "./components/TeamPage";
 import { ToastContainer, useToastRegister, toastError, toastSuccess } from "./components/Toast";
+import { useTheme } from "./hooks/useTheme";
+import { ThemeToggle } from "./components/ThemeToggle";
 
 type Page      = "dashboard"|"analyser"|"product-context"|"design-system"|"generator"|"conventions"|"history"|"guidelines"|"team";
 type ResultTab = "audit"|"components"|"gaps"|"recommendations"|"citations"|"json";
@@ -39,16 +41,23 @@ const DS_OPTIONS = [
   {id:"custom",   label:"Custom DS"},
 ];
 
-const NAV = [
-  {id:"dashboard",      icon:"🏠", label:"Dashboard"},
-  {id:"analyser",       icon:"🔍", label:"Analyser"},
-  {id:"product-context",icon:"📦", label:"Product Context"},
-  {id:"design-system",  icon:"⚙",  label:"Design System"},
-  {id:"generator",      icon:"✨", label:"Generator"},
-  {id:"conventions",    icon:"🧠", label:"Conventions"},
-  {id:"guidelines",     icon:"♿",  label:"Guidelines"},
-  {id:"history",        icon:"🗂",  label:"History"},
-  {id:"team",           icon:"👥", label:"Team"},
+interface NavItem {
+  id: string;
+  icon: string;
+  label: string;
+  aetherisLabel: string;
+}
+
+const NAV: NavItem[] = [
+  {id:"dashboard",       icon:"🏠", label:"Dashboard",       aetherisLabel:"Operational Surface"},
+  {id:"analyser",        icon:"🔍", label:"Analyser",         aetherisLabel:"Intelligence Analyser"},
+  {id:"product-context", icon:"📦", label:"Product Context",  aetherisLabel:"System Context"},
+  {id:"design-system",   icon:"⚙",  label:"Design System",    aetherisLabel:"Design Infrastructure"},
+  {id:"generator",       icon:"✨", label:"Generator",         aetherisLabel:"Synthesizer"},
+  {id:"conventions",     icon:"🧠", label:"Conventions",       aetherisLabel:"Governance Patterns"},
+  {id:"guidelines",      icon:"♿",  label:"Guidelines",        aetherisLabel:"Quality Standards"},
+  {id:"history",         icon:"🗂",  label:"History",           aetherisLabel:"Operational Memory"},
+  {id:"team",            icon:"👥", label:"Team",              aetherisLabel:"Team"},
 ];
 
 export default function App() {
@@ -64,6 +73,7 @@ export default function App() {
   const [analysingAll, setAnalysingAll] = useState(false);
   const [user, setUser]               = useState<any>(null);
   const { toasts, dismiss } = useToastRegister();
+  const { theme, toggle, isAetheris } = useTheme();
   const [tooltip, setTooltip]         = useState<string|null>(null);
   const [popup, setPopup]             = useState<{components:any[];ticketId:string;screenFile:string}|null>(null);
   const [handoffModal, setHandoffModal] = useState<{mode:HandoffMode;screen:any;gaps:any[];selectedComp?:any}|null>(null);
@@ -202,14 +212,17 @@ export default function App() {
       <nav className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20">
         <div className="flex items-center gap-4">
           <div className="flex items-center text-lg" style={{fontWeight:700}}>
-            <span className="text-[#0f62fe]">Ai</span><span className="text-[#ff832b]">4</span><span className="text-[#0f62fe]">UX</span>
+            <span style={{color: isAetheris ? "#3A6FF7" : "#0f62fe"}}>Ae</span><span style={{color: isAetheris ? "#5DD6FF" : "#ff832b"}}>the</span><span style={{color: isAetheris ? "#3A6FF7" : "#0f62fe"}}>ris</span>
           </div>
           <div className="px-3 py-1 bg-gray-100 rounded-full">
-            <span className="text-xs text-gray-500" style={{fontFamily:"IBM Plex Sans, sans-serif"}}>UX Pipeline</span>
+            <span className="text-xs text-gray-500" style={{fontFamily:"IBM Plex Sans, sans-serif"}}>
+  {isAetheris ? "Intelligence Platform" : "UX Pipeline"}
+</span>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-xs text-gray-400">claude-sonnet-4-6</span>
+<ThemeToggle theme={theme} onToggle={toggle} />
           {user&&(
             <div className="flex items-center gap-2 ml-2 pl-3 border-l border-gray-200">
               {user.picture&&<img src={user.picture} alt={user.name} className="w-7 h-7 rounded-full"/>}
@@ -232,7 +245,11 @@ export default function App() {
               <span style={{fontSize:18}}>{item.icon}</span>
               {page===item.id&&<div style={{position:"absolute",left:0,top:"20%",bottom:"20%",width:3,background:"#0f62fe",borderRadius:"0 2px 2px 0"}}/>}
               {tooltip===item.label&&(
-                <div className="absolute left-14 top-1/2 -translate-y-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-50" style={{pointerEvents:"none"}}>{item.label}</div>
+                <div className="absolute left-14 top-1/2 -translate-y-1/2 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-50"
+                  style={{pointerEvents:"none", background: isAetheris ? "#1E2633" : "#1f2937",
+                  border: isAetheris ? "1px solid rgba(58,111,247,0.3)" : "none"}}>
+                  {isAetheris ? (item as any).aetherisLabel : item.label}
+                </div>
               )}
             </button>
           ))}
