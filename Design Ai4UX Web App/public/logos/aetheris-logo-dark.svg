@@ -1,0 +1,62 @@
+<svg width="480" height="120" viewBox="0 0 480 120" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>Aetheris — Organisational Intelligence</title>
+  <desc>Aetheris logo: Topology A mark with wordmark, dark variant</desc>
+
+  <!-- Background -->
+  <rect width="480" height="120" fill="#0D1117"/>
+
+  <!-- ═══════════════════════════════════ -->
+  <!-- TOPOLOGY A MARK                     -->
+  <!-- ═══════════════════════════════════ -->
+
+  <!-- Ghost extension edges (dashed) -->
+  <line x1="24" y1="96" x2="8"  y2="78" stroke="#3A6FF7" stroke-width="1" stroke-dasharray="3 4" stroke-linecap="round" opacity="0.32"/>
+  <line x1="96" y1="96" x2="112" y2="78" stroke="#3A6FF7" stroke-width="1" stroke-dasharray="3 4" stroke-linecap="round" opacity="0.32"/>
+  <line x1="60" y1="18" x2="60"  y2="6"  stroke="#3A6FF7" stroke-width="1" stroke-dasharray="3 4" stroke-linecap="round" opacity="0.32"/>
+
+  <!-- Main A strokes -->
+  <line x1="60" y1="18" x2="24" y2="96" stroke="#3A6FF7" stroke-width="2" stroke-linecap="round"/>
+  <line x1="60" y1="18" x2="96" y2="96" stroke="#3A6FF7" stroke-width="2" stroke-linecap="round"/>
+  <!-- Crossbar -->
+  <line x1="36" y1="62" x2="84" y2="62" stroke="#3A6FF7" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Ghost nodes -->
+  <circle cx="8"   cy="78" r="2.5" fill="#0D1117" stroke="#3A6FF7" stroke-width="1"   opacity="0.3"/>
+  <circle cx="112" cy="78" r="2.5" fill="#0D1117" stroke="#3A6FF7" stroke-width="1"   opacity="0.3"/>
+  <circle cx="60"  cy="6"  r="2"   fill="#0D1117" stroke="#3A6FF7" stroke-width="0.8" opacity="0.3"/>
+
+  <!-- Main nodes -->
+  <circle cx="60" cy="18" r="5"   fill="#3A6FF7"/>
+  <circle cx="24" cy="96" r="4.5" fill="#0D1117" stroke="#3A6FF7" stroke-width="1.8"/>
+  <circle cx="96" cy="96" r="4.5" fill="#0D1117" stroke="#3A6FF7" stroke-width="1.8"/>
+
+  <!-- Crossbar nodes (Signal Cyan accent) -->
+  <circle cx="36" cy="62" r="3"   fill="#0D1117" stroke="#5DD6FF" stroke-width="1.4"/>
+  <circle cx="84" cy="62" r="3"   fill="#0D1117" stroke="#5DD6FF" stroke-width="1.4"/>
+
+  <!-- ═══════════════════════════════════ -->
+  <!-- WORDMARK                            -->
+  <!-- ═══════════════════════════════════ -->
+  <text
+    x="140" y="68"
+    font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+    font-size="36"
+    font-weight="300"
+    letter-spacing="7"
+    fill="#D7DEE8"
+  >AETHERIS</text>
+
+  <!-- Divider rule -->
+  <line x1="140" y1="80" x2="466" y2="80" stroke="#1E2633" stroke-width="0.75"/>
+
+  <!-- Tagline -->
+  <text
+    x="141" y="96"
+    font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+    font-size="8.5"
+    font-weight="400"
+    letter-spacing="3.5"
+    fill="#3A6FF7"
+    opacity="0.85"
+  >ORGANISATIONAL INTELLIGENCE</text>
+</svg>

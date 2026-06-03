@@ -1,0 +1,14 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>Aetheris</title>
+  <desc>Aetheris favicon — Topology A mark, pixel-optimised at 32px</desc>
+
+  <rect width="32" height="32" fill="#0D1117"/>
+
+  <!-- Main A strokes — heavier weight for small scale legibility -->
+  <line x1="16" y1="5"  x2="4"  y2="27" stroke="#3A6FF7" stroke-width="2" stroke-linecap="round"/>
+  <line x1="16" y1="5"  x2="28" y2="27" stroke="#3A6FF7" stroke-width="2" stroke-linecap="round"/>
+  <line x1="9"  y1="18" x2="23" y2="18" stroke="#3A6FF7" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Apex node only — crossbar and base nodes omitted at 32px for clarity -->
+  <circle cx="16" cy="5" r="2.5" fill="#3A6FF7"/>
+</svg>

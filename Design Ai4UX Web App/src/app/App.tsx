@@ -211,9 +211,15 @@ export default function App() {
       {/* TOP NAV */}
       <nav className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20">
         <div className="flex items-center gap-4">
-          <div className="flex items-center text-lg" style={{fontWeight:700}}>
-            <span style={{color: isAetheris ? "#3A6FF7" : "#0f62fe"}}>Ae</span><span style={{color: isAetheris ? "#5DD6FF" : "#ff832b"}}>the</span><span style={{color: isAetheris ? "#3A6FF7" : "#0f62fe"}}>ris</span>
-          </div>
+          <div className="flex items-center gap-2 text-lg" style={{fontWeight:700}}>
+  {isAetheris && (
+    <img src="/logos/aetheris-mark-dark.svg" alt="Aetheris" style={{width:24,height:24}}/>
+  )}
+  {isAetheris
+    ? <span style={{color:"#D7DEE8",fontFamily:"Inter, sans-serif",letterSpacing:"-0.02em"}}>Aetheris</span>
+    : <><span className="text-[#0f62fe]">Ai</span><span className="text-[#ff832b]">4</span><span className="text-[#0f62fe]">UX</span></>
+  }
+</div>
           <div className="px-3 py-1 bg-gray-100 rounded-full">
             <span className="text-xs text-gray-500" style={{fontFamily:"IBM Plex Sans, sans-serif"}}>
   {isAetheris ? "Intelligence Platform" : "UX Pipeline"}
