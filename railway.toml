@@ -1,8 +1,7 @@
 [build]
 builder = "NIXPACKS"
-
 [deploy]
-startCommand = "gunicorn ai4ux:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
+startCommand = "gunicorn ai4ux:app --bind 0.0.0.0:$PORT --workers 2 --timeout 300"
 healthcheckPath = "/login"
 healthcheckTimeout = 60
 restartPolicyType = "ON_FAILURE"
