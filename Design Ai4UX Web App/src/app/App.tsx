@@ -20,8 +20,10 @@ import { TeamPage } from "./components/TeamPage";
 import { ToastContainer, useToastRegister, toastError, toastSuccess } from "./components/Toast";
 import { useTheme } from "./hooks/useTheme";
 import { ThemeToggle } from "./components/ThemeToggle";
+import { TicketIntelligencePage } from "./components/TicketIntelligencePage";
 
-type Page      = "dashboard"|"analyser"|"product-context"|"design-system"|"generator"|"conventions"|"history"|"guidelines"|"team";
+
+type Page      = "dashboard"|"analyser"|"product-context"|"design-system"|"generator"|"conventions"|"history"|"guidelines"|"team"|"ticket-intelligence";
 type ResultTab = "audit"|"components"|"gaps"|"recommendations"|"citations"|"json";
 
 interface Ticket { key:string;summary:string;status:string;issue_type:string;priority:string; }
@@ -58,6 +60,7 @@ const NAV: NavItem[] = [
   {id:"guidelines",      icon:"♿",  label:"Guidelines",        aetherisLabel:"Quality Standards"},
   {id:"history",         icon:"🗂",  label:"History",           aetherisLabel:"Operational Memory"},
   {id:"team",            icon:"👥", label:"Team",              aetherisLabel:"Team"},
+  {id:"ticket-intelligence", icon:"🎯", label:"Ticket Intelligence", aetherisLabel:"Requirement Synthesis"}
 ];
 
 export default function App() {
@@ -271,8 +274,8 @@ export default function App() {
           {page==="conventions"    && <div className="flex-1 overflow-auto"><ConventionsPage/></div>}
           {page==="history"        && <div className="flex-1 overflow-auto"><HistoryPage/></div>}
           {page==="guidelines"    && <div className="flex-1 overflow-auto"><GuidelinesPage/></div>}
-          {page==="team"          && <div className="flex-1 overflow-auto"><TeamPage userEmail={user?.email||""}/>
-          </div>}
+          {page==="team" && <div className="flex-1 overflow-auto"><TeamPage userEmail={user?.email||""}/></div>}
+          {page==="ticket-intelligence" && <div className="flex-1 overflow-hidden"><TicketIntelligencePage/></div>}
 
           {page==="analyser"&&(
             <div className="flex flex-1 overflow-hidden">

@@ -1985,3 +1985,276 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     debug = not os.environ.get("RAILWAY_ENVIRONMENT")
     app.run(host="0.0.0.0", port=port, debug=debug)
+
+    # ============================================================
+# SPRINT 8 — Jira Ticket Intelligence
+# Add this route to ai4ux.py before the if __name__ block
+# ============================================================
+
+TICKET_INTELLIGENCE_PROMPT = """You are an AI Product Requirement Intelligence Assistant integrated with Jira.
+Your job is to transform vague or incomplete Jira tickets into implementation-ready product requirements and UX acceptance criteria.
+
+You will receive a Jira ticket with title, description, acceptance criteria, labels, and status.
+
+Your responsibilities:
+1. Understand the product intent behind the ticket.
+2. Detect ambiguity, missing requirements, missing edge cases, and unclear UX behavior.
+3. Perform lightweight competitive and industry-standard UX analysis using your knowledge of common SaaS/product patterns.
+4. Generate structured implementation-ready output.
+
+IMPORTANT RULES:
+- Do NOT generate generic boilerplate.
+- Think like a senior Product Manager + UX strategist.
+- Focus on usability, edge cases, accessibility, enterprise SaaS workflows, and implementation clarity.
+- Infer missing requirements carefully but clearly label assumptions.
+- Keep outputs concise, structured, and implementation-friendly.
+- Prioritize practical workflows over theoretical suggestions.
+- Acceptance criteria should be testable.
+- UX criteria should help both designers and developers.
+
+Return ONLY valid JSON with this exact structure:
+{
+  "ticket_understanding": "2-3 sentence summary of the intended feature/problem",
+  "competitive_insights": [
+    {"pattern": "Pattern name", "description": "How leading SaaS products handle this", "examples": ["Product A", "Product B"]}
+  ],
+  "clarification_questions": [
+    {"question": "Question text", "why_it_matters": "Impact on implementation"}
+  ],
+  "enhanced_description": {
+    "objective": "What this feature achieves",
+    "user_problem": "The specific problem being solved",
+    "proposed_experience": "How the experience should work",
+    "scope": "What is and is not included",
+    "dependencies": "Technical or product dependencies",
+    "assumptions": "Clearly labeled assumptions made"
+  },
+  "ux_acceptance_criteria": [
+    {"category": "Loading States|Empty States|Error States|Accessibility|Responsiveness|Validation|Edge Cases", "criteria": "Testable criteria item", "priority": "Must Have|Should Have|Nice to Have"}
+  ],
+  "edge_cases": [
+    {"case": "Edge case description", "risk": "High|Medium|Low", "recommendation": "How to handle it"}
+  ],
+  "suggested_priority": "High|Medium|Low",
+  "priority_rationale": "One sentence explaining the priority"
+}
+
+Tone: Professional, concise, enterprise-product focused, actionable.
+Avoid: excessive verbosity, generic AI wording, filler text."""
+
+
+@app.route("/enrich-ticket", methods=["POST"])
+@login_required
+def enrich_ticket():
+    """
+    Enrich a Jira ticket with PM/UX intelligence.
+    Accepts: { ticket_id: "PROJ-123" } or { ticket: {...} } (pre-fetched)
+    Returns: structured intelligence JSON
+    """
+    data = request.get_json()
+    ticket_id = data.get("ticket_id", "").strip()
+    ticket    = data.get("ticket", None)
+
+    # Fetch ticket if not provided
+    if not ticket and ticket_id:
+        try:
+            ticket = fetch_jira_ticket(ticket_id)
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
+
+    if not ticket:
+        return jsonify({"error": "No ticket provided"}), 400
+
+    uid = current_user_id()
+
+    # Build ticket context string
+    ticket_context = f"""JIRA TICKET:
+Key: {ticket.get('key', '')}
+Summary: {ticket.get('summary', '')}
+Type: {ticket.get('issue_type', '')}
+Status: {ticket.get('status', '')}
+Priority: {ticket.get('priority', '')}
+Assignee: {ticket.get('assignee', '')}
+Labels: {', '.join(ticket.get('labels', [])) or 'None'}
+
+Description:
+{ticket.get('description', 'No description provided')}
+
+Acceptance Criteria:
+{ticket.get('acceptance_criteria', 'No acceptance criteria defined')}"""
+
+    # Pull RAG context for additional intelligence
+    try:
+        rag_ctx = rag.build_analysis_context(
+            components_detected=[],
+            user_id=uid,
+            screen_description=ticket.get('summary', '') + ' ' + ticket.get('description', '')[:300]
+        )
+    except:
+        rag_ctx = ""
+
+    # Add conventions context
+    conv_ctx = get_conventions_context(uid)
+    prod_ctx = get_product_context_summary(uid)
+
+    full_context = ticket_context
+    if rag_ctx:   full_context += f"\n\nORGANISATIONAL CONTEXT:\n{rag_ctx}"
+    if conv_ctx:  full_context += f"\n\nESTABLISHED CONVENTIONS:\n{conv_ctx}"
+    if prod_ctx:  full_context += f"\n\nPRODUCT CONTEXT:\n{prod_ctx}"
+
+    try:
+        msg = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=4000,
+            system=TICKET_INTELLIGENCE_PROMPT,
+            messages=[{
+                "role": "user",
+                "content": f"Analyse this Jira ticket and return the structured intelligence JSON:\n\n{full_context}"
+            }]
+        )
+        raw = msg.content[0].text.strip()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            raw = raw[4:].strip() if raw.startswith("json") else raw.strip()
+        result = json.loads(raw)
+        result["_ticket"] = ticket
+        result["_enriched_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+        return jsonify(result)
+    except json.JSONDecodeError as e:
+        return jsonify({"error": f"Could not parse AI response: {str(e)}"}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/enrich-ticket/pdf", methods=["POST"])
+@login_required
+def enrich_ticket_pdf():
+    """Generate a PDF from enriched ticket intelligence."""
+    data = request.get_json()
+    result = data.get("result", {})
+    ticket = result.get("_ticket", {})
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=letter,
+        leftMargin=inch, rightMargin=inch, topMargin=inch, bottomMargin=inch)
+    S    = getSampleStyleSheet()
+    BLUE = colors.HexColor("#3A6FF7")
+    DARK = colors.HexColor("#0D1117")
+    GREY = colors.HexColor("#8A95A3")
+    LGREY= colors.HexColor("#f4f4f4")
+    GREEN= colors.HexColor("#198038")
+    RED  = colors.HexColor("#da1e28")
+    GOLD = colors.HexColor("#b28600")
+
+    ts  = ParagraphStyle('T', parent=S['Normal'], fontSize=20, textColor=DARK, fontName='Helvetica-Bold', spaceAfter=4)
+    ss  = ParagraphStyle('S', parent=S['Normal'], fontSize=10, textColor=GREY, spaceAfter=16, fontName='Helvetica')
+    h1  = ParagraphStyle('H1', parent=S['Normal'], fontSize=12, textColor=BLUE, fontName='Helvetica-Bold', spaceBefore=18, spaceAfter=6)
+    bs  = ParagraphStyle('B', parent=S['Normal'], fontSize=10, leading=15, textColor=DARK, spaceAfter=4)
+    bl  = ParagraphStyle('BL', parent=S['Normal'], fontSize=10, leading=15, textColor=DARK, leftIndent=16, spaceAfter=3)
+    sm  = ParagraphStyle('SM', parent=S['Normal'], fontSize=9, textColor=GREY, spaceAfter=2)
+
+    story = []
+
+    # Header
+    story.append(Paragraph("Aetheris — Ticket Intelligence Report", ts))
+    story.append(Paragraph(
+        f"Ticket: {ticket.get('key','')}  ·  {result.get('_enriched_at','')}  ·  Priority: {result.get('suggested_priority','')}",
+        ss))
+
+    # Ticket summary
+    story.append(Paragraph("TICKET", h1))
+    tbl = Table([
+        ["Key",      ticket.get('key','')],
+        ["Summary",  ticket.get('summary','')],
+        ["Type",     ticket.get('issue_type','')],
+        ["Status",   ticket.get('status','')],
+        ["Priority", ticket.get('priority','')],
+    ], colWidths=[1.2*inch, 5.3*inch])
+    tbl.setStyle(TableStyle([
+        ('FONTNAME',(0,0),(0,-1),'Helvetica-Bold'),('FONTSIZE',(0,0),(-1,-1),9),
+        ('TEXTCOLOR',(0,0),(0,-1),BLUE),
+        ('ROWBACKGROUNDS',(0,0),(-1,-1),[colors.white,LGREY]),
+        ('GRID',(0,0),(-1,-1),0.5,colors.HexColor("#e0e0e0")),
+        ('TOPPADDING',(0,0),(-1,-1),5),('BOTTOMPADDING',(0,0),(-1,-1),5),
+        ('LEFTPADDING',(0,0),(-1,-1),8)
+    ]))
+    story.append(tbl); story.append(Spacer(1,8))
+
+    # Ticket understanding
+    story.append(Paragraph("TICKET UNDERSTANDING", h1))
+    story.append(Paragraph(result.get('ticket_understanding',''), bs))
+
+    # Enhanced description
+    enh = result.get('enhanced_description', {})
+    if enh:
+        story.append(Paragraph("ENHANCED STORY DESCRIPTION", h1))
+        for field, label in [
+            ('objective','Objective'), ('user_problem','User Problem'),
+            ('proposed_experience','Proposed Experience'), ('scope','Scope'),
+            ('dependencies','Dependencies'), ('assumptions','Assumptions')
+        ]:
+            if enh.get(field):
+                story.append(Paragraph(f"<b>{label}:</b>", bs))
+                story.append(Paragraph(enh[field], bl))
+
+    # UX Acceptance Criteria
+    criteria = result.get('ux_acceptance_criteria', [])
+    if criteria:
+        story.append(Paragraph("UX ACCEPTANCE CRITERIA", h1))
+        td = [["Category", "Criteria", "Priority"]]
+        for c in criteria:
+            pri_color = GREEN if c.get('priority')=='Must Have' else GOLD if c.get('priority')=='Should Have' else GREY
+            td.append([
+                Paragraph(c.get('category',''), sm),
+                Paragraph(c.get('criteria',''), bs),
+                Paragraph(f'<font color="#{pri_color.hexval()[2:]}"><b>{c.get("priority","")}</b></font>', sm)
+            ])
+        t = Table(td, colWidths=[1.2*inch, 4.0*inch, 1.3*inch], repeatRows=1)
+        t.setStyle(TableStyle([
+            ('BACKGROUND',(0,0),(-1,0),DARK),('TEXTCOLOR',(0,0),(-1,0),colors.white),
+            ('FONTNAME',(0,0),(-1,0),'Helvetica-Bold'),('FONTSIZE',(0,0),(-1,-1),9),
+            ('ROWBACKGROUNDS',(0,1),(-1,-1),[colors.white,LGREY]),
+            ('GRID',(0,0),(-1,-1),0.5,colors.HexColor("#e0e0e0")),
+            ('VALIGN',(0,0),(-1,-1),'TOP'),
+            ('TOPPADDING',(0,0),(-1,-1),5),('BOTTOMPADDING',(0,0),(-1,-1),5),
+            ('LEFTPADDING',(0,0),(-1,-1),6)
+        ]))
+        story.append(t); story.append(Spacer(1,8))
+
+    # Edge cases
+    edges = result.get('edge_cases', [])
+    if edges:
+        story.append(Paragraph("EDGE CASES & RISKS", h1))
+        for e in edges:
+            risk_color = RED if e.get('risk')=='High' else GOLD if e.get('risk')=='Medium' else GREY
+            story.append(Paragraph(
+                f'<font color="#{risk_color.hexval()[2:]}"><b>[{e.get("risk","")}]</b></font> {e.get("case","")}', bs))
+            story.append(Paragraph(f"→ {e.get('recommendation','')}", bl))
+
+    # Clarification questions
+    questions = result.get('clarification_questions', [])
+    if questions:
+        story.append(Paragraph("CLARIFICATION QUESTIONS", h1))
+        for i, q in enumerate(questions, 1):
+            story.append(Paragraph(f"<b>Q{i}:</b> {q.get('question','')}", bs))
+            story.append(Paragraph(f"Why it matters: {q.get('why_it_matters','')}", bl))
+
+    # Competitive insights
+    insights = result.get('competitive_insights', [])
+    if insights:
+        story.append(Paragraph("COMPETITIVE & BEST-PRACTICE INSIGHTS", h1))
+        for ins in insights:
+            story.append(Paragraph(f"<b>{ins.get('pattern','')}</b>", bs))
+            story.append(Paragraph(ins.get('description',''), bl))
+            if ins.get('examples'):
+                story.append(Paragraph(f"Examples: {', '.join(ins['examples'])}", sm))
+
+    story.append(Spacer(1,20))
+    story.append(Paragraph("Generated by Aetheris — Design Intelligence",
+        ParagraphStyle('F', parent=S['Normal'], fontSize=8, textColor=GREY, alignment=1)))
+
+    doc.build(story); buf.seek(0)
+    ticket_key = ticket.get('key','ticket').replace('-','_').lower()
+    return send_file(buf, mimetype="application/pdf", as_attachment=True,
+        download_name=f"aetheris_intelligence_{ticket_key}.pdf")
+
