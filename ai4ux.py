@@ -1126,7 +1126,7 @@ def analyse():
         ds_id = data.get("design_system","carbon")
         has_ticket = bool(ticket.get("key","").strip())
         dynamic_prompt = get_system_prompt(ds_id) if has_ticket else get_screen_only_prompt(ds_id)
-        msg=client.messages.create(model="claude-sonnet-4-6",max_tokens=8000,system=dynamic_prompt,messages=[{"role":"user","content":[{"type":"image","source":{"type":"base64","media_type":media_type,"data":image_b64}},{"type":"text","text":f"Analyse this UI screen. Return full JSON.\n\n{full_ctx}"}]}])
+        msg=client.messages.create(model="claude-sonnet-4-6",max_tokens=12000,system=dynamic_prompt,messages=[{"role":"user","content":[{"type":"image","source":{"type":"base64","media_type":media_type,"data":image_b64}},{"type":"text","text":f"Analyse this UI screen. Return full JSON.\n\n{full_ctx}"}]}])
         raw=msg.content[0].text.strip()
         if raw.startswith("```"): raw=raw.split("```")[1]; raw=raw[4:].strip() if raw.startswith("json") else raw.strip()
         analysis=json.loads(raw)
