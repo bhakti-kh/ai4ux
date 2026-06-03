@@ -49,9 +49,12 @@ export function TicketIntelligencePage() {
   const [copied, setCopied]         = useState(false);
   const [downloading, setDownloading] = useState(false);
 
+
   async function handleEnrich() {
     if (!ticketId.trim()) return;
     setLoading(true); setError(""); setResult(null);
+    const saved = await fetch(`/ticket-intelligence/get?ticket_id=${ticketId.trim().toUpperCase()}`).then(r=>r.json());
+    if (saved.result) { setResult(saved.result); setActiveSection("understanding"); setLoading(false); return; }
     try {
       const r = await fetch("/enrich-ticket", {
         method: "POST",
@@ -60,10 +63,14 @@ export function TicketIntelligencePage() {
       });
       const d = await r.json();
       if (d.error) setError(d.error);
-      else { setResult(d); setActiveSection("understanding"); }
-    } catch (e: any) { setError("Network error: " + e.message); }
-    finally { setLoading(false); }
-  }
+      else {
+        setResult(d);
+        setActiveSection("understanding");
+        fetch("/ticket-intelligence/save", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ticket_id: ticketId.trim().toUpperCase(), result: d})});
+      }
+      } catch (e: any) { setError("Network error: " + e.message); }
+      finally { setLoading(false); }
+    }
 
   async function handleDownloadPDF() {
     if (!result) return;

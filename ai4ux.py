@@ -433,6 +433,7 @@ init_product_context_db()
 init_guidelines_db()
 init_gap_resolutions_db()
 init_teams_db()
+init_ticket_intelligence_db()
 
 # Startup: ingest built-in guidelines into RAG
 try:
@@ -1980,13 +1981,7 @@ def figma_status():
     except Exception as e:
         return jsonify({"configured": False, "message": str(e)})
 
-# ── Entry point ───────────────────────────────────────────────
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    debug = not os.environ.get("RAILWAY_ENVIRONMENT")
-    app.run(host="0.0.0.0", port=port, debug=debug)
-
-    # ============================================================
+# ============================================================
 # SPRINT 8 — Jira Ticket Intelligence
 # Add this route to ai4ux.py before the if __name__ block
 # ============================================================
@@ -2258,3 +2253,91 @@ def enrich_ticket_pdf():
     return send_file(buf, mimetype="application/pdf", as_attachment=True,
         download_name=f"aetheris_intelligence_{ticket_key}.pdf")
 
+# ============================================================
+# SPRINT 8B — Ticket Intelligence persistence + Analyser link
+# Add to ai4ux.py
+# ============================================================
+
+# ── 1. Add to init_teams_db() or create separately ──────────
+# Call init_ticket_intelligence_db() with your other init calls
+
+def init_ticket_intelligence_db():
+    conn = connect_db()
+    conn.execute("""CREATE TABLE IF NOT EXISTS ticket_intelligence (
+        id SERIAL PRIMARY KEY,
+        ticket_id TEXT NOT NULL,
+        user_id TEXT NOT NULL,
+        result_json TEXT NOT NULL,
+        created_at TEXT,
+        UNIQUE(ticket_id, user_id)
+    )""")
+    conn.commit(); conn.close()
+
+# ── 2. Add these routes near your other /enrich-ticket routes ─
+
+@app.route("/ticket-intelligence/save", methods=["POST"])
+@login_required
+def save_ticket_intelligence():
+    """Save an enriched ticket intelligence report."""
+    data      = request.get_json()
+    ticket_id = data.get("ticket_id", "").strip().upper()
+    result    = data.get("result", {})
+    if not ticket_id or not result:
+        return jsonify({"error": "ticket_id and result required"}), 400
+    uid = current_user_id()
+    conn = connect_db()
+    if _USE_PG:
+        conn.execute(
+            "INSERT INTO ticket_intelligence (ticket_id, user_id, result_json, created_at) "
+            "VALUES (%s, %s, %s, %s) ON CONFLICT (ticket_id, user_id) DO UPDATE SET result_json=EXCLUDED.result_json, created_at=EXCLUDED.created_at",
+            (ticket_id, uid, json.dumps(result), datetime.now().strftime("%Y-%m-%d %H:%M"))
+        )
+    else:
+        conn.execute(
+            "INSERT OR REPLACE INTO ticket_intelligence (ticket_id, user_id, result_json, created_at) VALUES (?,?,?,?)",
+            (ticket_id, uid, json.dumps(result), datetime.now().strftime("%Y-%m-%d %H:%M"))
+        )
+    conn.commit(); conn.close()
+    return jsonify({"ok": True})
+
+@app.route("/ticket-intelligence/get")
+@login_required
+def get_ticket_intelligence():
+    """Get a saved ticket intelligence report by ticket_id."""
+    ticket_id = request.args.get("ticket_id", "").strip().upper()
+    if not ticket_id:
+        return jsonify({"result": None})
+    uid = current_user_id()
+    conn = connect_db()
+    row = conn.execute(
+        "SELECT result_json, created_at FROM ticket_intelligence WHERE ticket_id = %s AND user_id = %s",
+        (ticket_id, uid)
+    ).fetchone()
+    conn.close()
+    if not row:
+        return jsonify({"result": None})
+    return jsonify({
+        "result": json.loads(row["result_json"]),
+        "created_at": row["created_at"]
+    })
+
+@app.route("/ticket-intelligence/list")
+@login_required
+def list_ticket_intelligence():
+    """List all saved ticket intelligence reports for the user."""
+    uid = current_user_id()
+    conn = connect_db()
+    rows = conn.execute(
+        "SELECT ticket_id, created_at FROM ticket_intelligence WHERE user_id = %s ORDER BY id DESC",
+        (uid,)
+    ).fetchall()
+    conn.close()
+    return jsonify([dict(r) for r in rows])
+
+# ── Entry point ───────────────────────────────────────────────
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    debug = not os.environ.get("RAILWAY_ENVIRONMENT")
+    app.run(host="0.0.0.0", port=port, debug=debug)
+
+    
