@@ -993,6 +993,7 @@ def init_db_now():
         ("team_members", "CREATE TABLE IF NOT EXISTS team_members (id SERIAL PRIMARY KEY, team_id INTEGER NOT NULL, user_email TEXT NOT NULL, role TEXT DEFAULT 'member', status TEXT DEFAULT 'pending', invited_by TEXT, joined_at TEXT, UNIQUE(team_id, user_email))"),
         ("team_invites", "CREATE TABLE IF NOT EXISTS team_invites (id SERIAL PRIMARY KEY, team_id INTEGER NOT NULL, invited_email TEXT NOT NULL, invited_by TEXT NOT NULL, token TEXT UNIQUE NOT NULL, status TEXT DEFAULT 'pending', created_at TEXT)"),
         ("spec_sharing", "CREATE TABLE IF NOT EXISTS spec_sharing (id SERIAL PRIMARY KEY, spec_id TEXT NOT NULL, shared_by TEXT NOT NULL, team_id INTEGER NOT NULL, created_at TEXT, UNIQUE(spec_id, team_id))"),
+        ("ticket_intelligence", "CREATE TABLE IF NOT EXISTS ticket_intelligence (id SERIAL PRIMARY KEY, ticket_id TEXT NOT NULL, user_id TEXT NOT NULL, result_json TEXT NOT NULL, created_at TEXT, UNIQUE(ticket_id, user_id))"),
     ]
     conn = connect_db()
     for name, sql in tables:
