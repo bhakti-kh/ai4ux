@@ -98,6 +98,8 @@ last_analysis = {}
 # RAG
 # ============================================================
 try:
+    if os.environ.get("DISABLE_CHROMA"):
+        raise ImportError("ChromaDB disabled via env var")
     from rag_store import rag
     _RAG_AVAILABLE = True
 except Exception as _rag_err:
