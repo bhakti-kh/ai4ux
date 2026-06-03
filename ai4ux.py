@@ -435,7 +435,6 @@ init_product_context_db()
 init_guidelines_db()
 init_gap_resolutions_db()
 init_teams_db()
-init_ticket_intelligence_db()
 
 # Startup: ingest built-in guidelines into RAG
 try:
@@ -2274,7 +2273,7 @@ def init_ticket_intelligence_db():
         UNIQUE(ticket_id, user_id)
     )""")
     conn.commit(); conn.close()
-
+init_ticket_intelligence_db()
 # ── 2. Add these routes near your other /enrich-ticket routes ─
 
 @app.route("/ticket-intelligence/save", methods=["POST"])
