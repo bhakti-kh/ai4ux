@@ -686,3 +686,4 @@ def _chunk_text(text: str, max_chars: int = 700) -> list[str]:
 
 # ── Singleton ────────────────────────────────────────────────────────────────
 rag = RagStore()
+# force rebuild 
